@@ -45,8 +45,8 @@ async function startServer(app) {
       const token = req.headers.authorization;
       const user = getUser(token);
       return { models, user };
-    },
-    plugins: [ ApolloServerPluginLandingPageGraphQLPlayground() ]
+    }
+
   });
   await server.start();
   server.applyMiddleware({ app, path: '/api' });
