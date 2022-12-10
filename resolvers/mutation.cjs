@@ -10,13 +10,13 @@ require("dotenv").config();
 const gravatar = require("../util/gravatar.cjs");
 
 module.exports = {
-    signUp: async (parent, { username, email, password }, { models }) => {
+    signUp: async (parent, { name, email, password }, { models }) => {
         email = email.trim().toLowerCase();
         const hashed = await bcrypt.hash(password, 10);
         const avatar = gravatar(email);
         try {
             const user = await models.User.create({
-                username,
+                name,
                 email,
                 avatar,
                 password: hashed,
@@ -47,10 +47,10 @@ module.exports = {
         if (!user) {
             throw new AuthenticationError("You must be signed in to leave family");
         }
-        const family = await models.Note.findOne({ members: user.id });
-        // Remove from family !
+        const family = await models.Family.findOne({ members: user.id });
+        // TODO Remove from family !
         await models.User.findOneAndUpdate(
-            { id: user.id },
+            { _id: user.id },
             { family: null },
             { new: true }
         );
@@ -60,10 +60,20 @@ module.exports = {
         if (!user) {
             throw new AuthenticationError("You must be signed in to create a family");
         }
-        const result = await models.Note.create({
+        const result = await models.Family.create({
             family_name: args.family_name || null,
-            owner: mongoose.Types.ObjectId(user),
+            owner: user.id,
+            members: [user.id]
         });
+        await models.User.findByIdAndUpdate(
+            user.id,
+            {
+                family: mongoose.Types.ObjectId(result._id)
+            },
+            {
+                new: true,
+            }
+        );
         return result;
     },
     deleteFamily: async (parent, args, { models, user }) => {
@@ -71,19 +81,19 @@ module.exports = {
             throw new AuthenticationError("You must be signed in to delete family");
         }
         const family = await models.Family.findOne({ _id: args.family_id });
-        if (family.owner !== user) {
+        if (family.owner !== user.id) {
             throw new AuthenticationError("You must be owner of family to delete it");
         }
         await models.Family.findOneAndDelete({ id: args.family_id });
         await models.User.updateMany({ family: args.family_id }, { family: null });
         return "Family deleted";
     },
-    inviteMember: async (parent, args, { models }) => {
+    inviteMember: async (parent, args, { models, user }) => {
         if (!user) {
             throw new AuthenticationError("You must be signed in to invite members");
         }
         const family = await models.Family.findOne({ _id: args.family_id });
-        if (family.owner !== user) {
+        if (family && String(family.owner) !== user.id) {
             throw new AuthenticationError(
                 "You must be owner of family to invite members"
             );
@@ -100,6 +110,48 @@ module.exports = {
             }
         );
         return true;
+    },
+    acceptFamily: async (parent, args, { models, user }) => {
+        if (!user) {
+            throw new AuthenticationError("You must be signed in to invite members");
+        }
+        const currentUser = await models.User.findById(user.id);
+        if (!currentUser) throw new Error("Error finding user");
+        let invitations = [];
+        for (let index = 0; index < currentUser.invitations.length; index++) {
+            const element = currentUser.invitations[index];
+            invitations.push(String(element));
+        }
+
+        if (!invitations.includes(args.family_id)) {
+            throw new AuthenticationError(
+                "You must be invited to the family"
+            );
+        }
+        await models.User.findByIdAndUpdate(
+            user.id,
+            {
+                $pull: {
+                    invitations: mongoose.Types.ObjectId(args.family_id),
+                },
+                family: mongoose.Types.ObjectId(args.family_id)
+            },
+            {
+                new: true,
+            }
+        );
+        
+        return await models.Family.findByIdAndUpdate(
+            args.family_id,
+            {
+                $push: {
+                    members: mongoose.Types.ObjectId(user.id),
+                },
+            },
+            {
+                new: true,
+            }
+        );
     },
     deleteMember: async (parent, args, { models }) => {
         if (!user) {
@@ -184,7 +236,9 @@ module.exports = {
         if (shoppingList.locked) {
             throw new ForbiddenError("Shopping list is locked");
         }
+        // TODO calculate total.
         return await models.ListItem.create({
+            item: mongoose.Types.ObjectId(args.item_id),
             shopping_list: mongoose.Types.ObjectId(args.shopping_list_id),
             notes: args.notes || null,
             quantity: args.quantity || 1,
@@ -233,7 +287,7 @@ module.exports = {
                 "You must be signed in to create a shopping list"
             );
         }
-        const foundUser = await models.User.findOne({ _id: user });
+        const foundUser = await models.User.findById(user.id);
         const result = await models.ShoppingList.create({
             name: args.name || null,
             owner_family: mongoose.Types.ObjectId(foundUser.family),
@@ -247,7 +301,7 @@ module.exports = {
             );
         }
         const family = await models.Family.findOne({ _id: args.family_id });
-        if (family.owner !== user) {
+        if (family.owner !== user.id) {
             throw new AuthenticationError(
                 "You must be owner of the family to toggle shopping lists"
             );
