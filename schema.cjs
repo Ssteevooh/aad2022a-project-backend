@@ -16,7 +16,7 @@ type Item {
   id: ID!
   name: String!
   description: String
-  price: Float!
+  price: Float
   createdAt: DateTime!
   updatedAt: DateTime!
 }
@@ -26,7 +26,7 @@ type ListItem {
   item: Item!
   shopping_list: ShoppingList!
   quantity: Int
-  collected: Boolean!
+  collected: Boolean
   notes: String
   total_price: Float
   createdAt: DateTime!
