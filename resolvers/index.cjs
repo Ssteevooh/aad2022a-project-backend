@@ -1,17 +1,19 @@
 const Query = require('./query.cjs');
-const MutationFamily = require('./mutationFamily.cjs');
-const MutationItem = require('./mutationItem.cjs');
-const MutationListItem = require('./mutationListItem.cjs');
-const MutationShoppingList = require('./mutationShoppingList.cjs');
-const MutationUser = require('./mutationUser.cjs');
+const Family = require('./family.cjs');
+const Item = require('./item.cjs');
+const ListItem = require('./ListItem.cjs');
+const ShoppingList = require('./shoppingList.cjs');
+const User = require('./user.cjs');
+const Mutation = require('./mutation.cjs')
 const { GraphQLDateTime } = require('graphql-scalars');
 
 module.exports = {
   Query,
-  MutationFamily,
-  MutationItem,
-  MutationListItem,
-  MutationShoppingList,
-  MutationUser,
+  Mutation,
+  Family,
+  Item,
+  ListItem,
+  ShoppingList,
+  User,
   DateTime: GraphQLDateTime
 };

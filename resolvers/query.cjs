@@ -1,20 +1,23 @@
+const mongoose = require('mongoose');
+
 module.exports = {
   getFamily: async (parent, args, { models, user }) => {
-    //TODO: Change this. Set as find with user id
-    return await models.Family.findById(args.family_id);
+    return await models.Family.findById(mongoose.Types.ObjectId(args.family_id));
   }, 
   getItems: async (parent, args, { models }) => {
     //Mayby allow search ?
     return await models.Item.find();
   },
   getShoppingListContent: async (parent, args, { models }) => {
-    return await models.ListItem.find({ id: args.shopping_list_id });
+    const listItems = await models.ListItem.find({shopping_list: args.shopping_list_id});
+    return listItems;
   },
-  getShoppingLists: async (parent, args, { models }) => {
-    return await models.ShoppingList.find({ id: args.family_id });
+  getMyShoppingLists: async (parent, args, { models, user }) => {
+    const currentUser = await models.User.findById(user.id);
+    return await models.ShoppingList.find({owner_family: currentUser.family});
   },
   user: async (parent, args, { models }) => {
-    return await models.User.findOne({ username: args.name });
+  return await models.User.find({ name: {$regex: args.name} }).limit(20);
   },
   usersToInvite: async (parent, args, { models }) => {
     return await models.User.find({family: null}).select('id name');
@@ -22,4 +25,8 @@ module.exports = {
   me: async (parent, args, { models, user }) => {
     return await models.User.findById(user.id);
   },
+  getMyFamily: async (parent, args, { models, user }) => {
+    const currentUser = await models.User.findById(user.id);
+    return await models.Family.findById(currentUser.family);
+  }, 
 };

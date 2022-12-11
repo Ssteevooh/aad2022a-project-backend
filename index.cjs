@@ -29,7 +29,8 @@ db.connect(DB_HOST);
 const getUser = token => {
   if (token) {
     try {
-      return jwt.verify(token, process.env.JWT_SECRET);
+      const user = jwt.verify(token, process.env.JWT_SECRET);
+      return user
     } catch (err) {
       throw new Error('Session invalid');
     }
@@ -45,8 +46,8 @@ async function startServer(app) {
       const token = req.headers.authorization;
       const user = getUser(token);
       return { models, user };
-    },
-    plugins: [ ApolloServerPluginLandingPageGraphQLPlayground() ]
+    }
+
   });
   await server.start();
   server.applyMiddleware({ app, path: '/api' });
