@@ -22,6 +22,7 @@ type Item {
 }
 
 type ListItem {
+  id: ID!
   item: Item!
   shopping_list: ShoppingList!
   quantity: Int
