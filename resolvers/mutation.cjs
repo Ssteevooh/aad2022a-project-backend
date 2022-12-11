@@ -48,6 +48,7 @@ module.exports = {
             throw new AuthenticationError("You must be signed in to leave family");
         }
         const family = await models.Family.findOne({ members: user.id });
+        //Validate if owner, then cant leave.
         // TODO Remove from family !
         await models.User.findOneAndUpdate(
             { _id: user.id },
@@ -153,18 +154,19 @@ module.exports = {
             }
         );
     },
-    deleteMember: async (parent, args, { models }) => {
+    deleteFamilyMember: async (parent, args, { models, user }) => {
         if (!user) {
             throw new AuthenticationError("You must be signed in to delete members");
         }
-        const family = await models.Family.findOne({ _id: args.family_id });
-        if (family.owner !== user) {
+        const foundUser = await models.User.findById(user.id);
+        const family = await models.Family.findById(foundUser.family);
+        if (family && String(family.owner) !== user.id) {
             throw new AuthenticationError(
                 "You must be owner of family to delete members"
             );
         }
         await models.Family.findByIdAndUpdate(
-            args.family_id,
+            foundUser.family,
             {
                 $pull: {
                     members: mongoose.Types.ObjectId(args.user_id),
@@ -173,6 +175,11 @@ module.exports = {
             {
                 new: true,
             }
+        );
+        await models.User.findByIdAndUpdate(
+            args.user_id,
+            { family: null },
+            { new: true }
         );
         return true;
     },
@@ -246,24 +253,20 @@ module.exports = {
     },
     deleteListItem: async (parent, args, { models, user }) => {
         if (!user) {
-            throw new AuthenticationError("You must be signed in to delete items");
+            throw new AuthenticationError("You must be signed in to delete list items");
         }
-        const shoppingList = await models.ShoppingList.findOne({
-            _id: args.shopping_list_id,
-        });
+        const shoppingList = await models.ShoppingList.findById(args.shopping_list_id);
         if (shoppingList.locked) {
             throw new ForbiddenError("Shopping list is locked");
         }
         await models.ListItem.findOneAndDelete({ _id: args.list_item_id });
         return true;
     },
-    updateListItem: async (parent, args, { models }) => {
+    updateListItem: async (parent, args, { models, user }) => {
         if (!user) {
             throw new AuthenticationError("You must be signed in to update items");
         }
-        const shoppingList = await models.ShoppingList.findOne({
-            _id: args.shopping_list_id,
-        });
+        const shoppingList = await models.ShoppingList.findById(args.shopping_list_id);
         if (shoppingList.locked) {
             throw new ForbiddenError("Shopping list is locked");
         }
@@ -273,7 +276,7 @@ module.exports = {
             : (updateObject.collected = false);
         if (args.quantity) updateObject.quantity = args.quantity;
         if (args.notes) updateObject.notes = args.notes;
-        return await models.Item.findByIdAndUpdate(
+        return await models.ListItem.findByIdAndUpdate(
             args.list_item_id,
             updateObject,
             {
@@ -300,19 +303,16 @@ module.exports = {
                 "You must be signed in to toggle shopping list"
             );
         }
-        const family = await models.Family.findOne({ _id: args.family_id });
-        if (family.owner !== user.id) {
+        const foundUser = await models.User.findById(user.id);
+        const family = await models.Family.findById(foundUser.family);
+        if (family && String(family.owner) !== user.id) {
             throw new AuthenticationError(
-                "You must be owner of the family to toggle shopping lists"
+                "You must be owner of family to lock or unlock shopping lists"
             );
         }
-        const shoppingList = await models.ShoppingList.findById({
-            id: args.shopping_list_id,
-        });
-        return await models.ShoppingList.findOneAndUpdate(
-            {
-                _id: id,
-            },
+        const shoppingList = await models.ShoppingList.findById(args.shopping_list_id);
+        return await models.ShoppingList.findByIdAndUpdate(
+            args.shopping_list_id,
             {
                 $set: {
                     locked: !shoppingList.locked,

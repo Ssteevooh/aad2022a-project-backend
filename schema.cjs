@@ -54,8 +54,8 @@ type Query {
   getFamily(family_id: ID!): Family
   getItems: [Item!]!
   getShoppingListContent(shopping_list_id: ID!): [ListItem]
-  getShoppingLists(family_id: ID!): [ShoppingList!]!
-  user(username: String!): User
+  getMyShoppingLists: [ShoppingList]!
+  user(name: String!): [User]
   usersToInvite: [User!]!
   me: User!
   getMyFamily: Family
@@ -69,16 +69,16 @@ type Mutation {
   createFamily(family_name: String): Family
   deleteFamily(family_id: ID!): String
   inviteMember(family_id: ID, user_id: ID): Boolean
-  deleteMember(user_id: ID, family_id: ID): Boolean
+  deleteFamilyMember(user_id: ID!): Boolean
   updateFamily(family_id: ID, family_name: String!): Family
   createItem(name: String!, description: String, price: Float!): Item
   deleteItem(item_id: ID!): String
   updateItem(item_id: ID, name: String!, description: String!, price: Float!): Item
   createShoppingList(name: String): ShoppingList
-  toggleShoppingList(family_id: ID, shopping_list_id: ID): ShoppingList
+  toggleShoppingList(shopping_list_id: ID!): ShoppingList
   deleteShoppingList(shopping_list_id: ID, family_id: ID): Boolean
   createListItem(shopping_list_id: ID!, item_id: ID!, quantity: Int): ListItem
-  updateListItem(shopping_list_id: ID, list_item_id: ID, quantity: Int!, collected: Boolean!, notes: String!): ListItem
-  deleteListItem(list_item_id: ID, shopping_list_id: ID): Boolean
+  updateListItem(shopping_list_id: ID!, list_item_id: ID!, quantity: Int, collected: Boolean, notes: String): ListItem
+  deleteListItem(list_item_id: ID!, shopping_list_id: ID!): Boolean
 }
 `;

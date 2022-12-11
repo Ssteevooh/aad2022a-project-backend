@@ -12,11 +12,12 @@ module.exports = {
     const listItems = await models.ListItem.find({shopping_list: args.shopping_list_id});
     return listItems;
   },
-  getShoppingLists: async (parent, args, { models }) => {
-    return await models.ShoppingList.findById(args.family_id);
+  getMyShoppingLists: async (parent, args, { models, user }) => {
+    const currentUser = await models.User.findById(user.id);
+    return await models.ShoppingList.find({owner_family: currentUser.family});
   },
   user: async (parent, args, { models }) => {
-    return await models.User.findOne({ username: args.name });
+  return await models.User.find({ name: {$regex: args.name} }).limit(20);
   },
   usersToInvite: async (parent, args, { models }) => {
     return await models.User.find({family: null}).select('id name');
