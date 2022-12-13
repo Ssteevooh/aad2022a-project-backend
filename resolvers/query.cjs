@@ -18,7 +18,7 @@ module.exports = {
   usersToInvite: async (parent, args, { models, user }) => {
     const foundUser = await models.User.findById(user.id);
     const family = await models.Family.findById(foundUser.family);
-    return await models.User.find({family: null, invitations: { $not: mongoose.Types.ObjectId(family.id)}}).select('id name');
+    return await models.User.find({family: null, invitations: {$nin: [mongoose.Types.ObjectId(family.id)]}}).select('id name avatar');
   },
   me: async (parent, args, { models, user }) => {
     return await models.User.findById(user.id);

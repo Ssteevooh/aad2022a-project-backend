@@ -103,7 +103,9 @@ module.exports = {
             throw new AuthenticationError("You must be signed in to invite members");
         }
         const currentUser = await models.User.findById(user.id);
-        const family = await models.Family.findOne({ id: currentUser.family });
+        const family = await models.Family.findById(currentUser.family);
+        console.log(String(family.owner));
+        console.log(user.id);
         if (family && String(family.owner) !== user.id) {
             throw new AuthenticationError(
                 "You must be owner of family to invite members"
@@ -113,7 +115,7 @@ module.exports = {
             args.user_id,
             {
                 $push: {
-                    invitations: mongoose.Types.ObjectId(args.family_id),
+                    invitations: mongoose.Types.ObjectId(family.id),
                 },
             },
             {
