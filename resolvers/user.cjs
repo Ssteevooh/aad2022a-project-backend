@@ -5,7 +5,13 @@ module.exports = {
     return await models.Family.find({ members: user._id});
   },
   invitations: async (user, args, { models }) => {
-    console.log(user);
-    return await models.Family.find({ id: {$in: [user.invitations]}});
+    let tempInv = [];
+    for (let index = 0; index < user.invitations.length; index++) {
+      const invitation = user.invitations[index];
+      const foundFamily = await models.Family.findById(invitation);
+      tempInv.push(foundFamily);
+    }
+    return tempInv;
+    
   }
 };
