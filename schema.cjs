@@ -6,7 +6,7 @@ scalar DateTime
 type Family {
   id: ID!
   family_name: String
-  owner: User!
+  owner: User
   members: [User]
   createdAt: DateTime!
   updatedAt: DateTime!
@@ -65,6 +65,7 @@ type Query {
 type Mutation {
   signUp(name: String!, email: String!, password: String!): String!
   signIn(email: String!, password: String!): String!
+  updateSelf(name: String, email: String): User!
   leaveFamily: String!
   acceptFamily(family_id: ID!): Family
   createFamily(family_name: String): Family

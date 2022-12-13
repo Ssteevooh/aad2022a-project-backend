@@ -43,6 +43,15 @@ module.exports = {
 
         return jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     },
+    updateSelf: async (parent, args, { models, user }) => {
+        if (!user) {
+            throw new AuthenticationError("You must be signed in to update your info");
+        }
+        const updateObject = {};
+        if (args.name) updateObject.name = args.name;
+        if (args.email) updateObject.email = args.email;
+        return await models.User.findByIdAndUpdate(user.id, updateObject, { new: true });
+    },
     leaveFamily: async (parent, args, { models, user }) => {
         if (!user) {
             throw new AuthenticationError("You must be signed in to leave family");
