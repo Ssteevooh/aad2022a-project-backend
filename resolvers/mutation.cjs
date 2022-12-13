@@ -56,9 +56,18 @@ module.exports = {
         if (!user) {
             throw new AuthenticationError("You must be signed in to leave family");
         }
-        const family = await models.Family.findOne({ members: user.id });
-        //Validate if owner, then cant leave.
-        // TODO Remove from family !
+        const foundUser = await models.User.findById(user.id);
+        await models.Family.findByIdAndUpdate(
+            foundUser.family,
+            {
+                $pull: {
+                    members: mongoose.Types.ObjectId(user.id),
+                },
+            },
+            {
+                new: true,
+            }
+        );
         await models.User.findOneAndUpdate(
             { _id: user.id },
             { family: null },
@@ -133,7 +142,6 @@ module.exports = {
             const element = currentUser.invitations[index];
             invitations.push(String(element));
         }
-
         if (!invitations.includes(args.family_id)) {
             throw new AuthenticationError(
                 "You must be invited to the family"
@@ -142,9 +150,7 @@ module.exports = {
         await models.User.findByIdAndUpdate(
             user.id,
             {
-                $pull: {
-                    invitations: mongoose.Types.ObjectId(args.family_id),
-                },
+                invitations: [],
                 family: mongoose.Types.ObjectId(args.family_id)
             },
             {
