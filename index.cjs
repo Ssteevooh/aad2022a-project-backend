@@ -11,7 +11,6 @@ const helmet = require('helmet');
 const cors = require('cors');
 const depthLimit = require('graphql-depth-limit');
 const { createComplexityLimitRule } = require('graphql-validation-complexity');
-const { ApolloServerPluginLandingPageGraphQLPlayground } = require('apollo-server-core');
 
 const port = process.env.PORT || 7000;
 const DB_HOST = process.env.DB_HOST;
