@@ -316,22 +316,16 @@ module.exports = {
                 "You must be signed in to delete shopping lists"
             );
         }
+        console.log(args.shopping_list_id);
         const foundUser = await models.User.findById(user.id);
         const family = await models.Family.findById(foundUser.family);
-        if (family.owner !== user) {
+        if (family && String(family.owner) !== user.id) {
             throw new AuthenticationError(
-                "You must be owner of the family to toggle shopping lists"
+                "You must be owner of family to lock or unlock shopping lists"
             );
         }
-        const shoppingList = await models.ShoppingList.findById({
-            id: args.shopping_list_id,
-        });
-        if (shoppingList.owner_family !== family._id) {
-            throw new AuthenticationError(
-                "You must be owner family of this shopping lists"
-            );
-        }
-        await models.ShoppingList.findOneAndDelete({ _id: args.shopping_list_id });
+        await models.ShoppingList.findByIdAndDelete(args.shopping_list_id);
+        await models.ListItem.deleteMany({shopping_list: mongoose.Types.ObjectId(args.shopping_list_id)});
         return true;
     },
 };

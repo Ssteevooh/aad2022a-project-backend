@@ -15,8 +15,10 @@ module.exports = {
   user: async (parent, args, { models }) => {
   return await models.User.find({ name: {$regex: args.name} }).limit(20);
   },
-  usersToInvite: async (parent, args, { models }) => {
-    return await models.User.find({family: null}).select('id name');
+  usersToInvite: async (parent, args, { models, user }) => {
+    const foundUser = await models.User.findById(user.id);
+    const family = await models.Family.findById(foundUser.family);
+    return await models.User.find({family: null, invitations: { $not: mongoose.Types.ObjectId(family.id)}}).select('id name');
   },
   me: async (parent, args, { models, user }) => {
     return await models.User.findById(user.id);
