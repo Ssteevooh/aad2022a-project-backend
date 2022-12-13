@@ -11,7 +11,7 @@ const ListItemSchema = new mongoose.Schema({
         required: false,
     },
     price: {
-        type: Number,
+        type: String,
         required: false,
     },
     shopping_list: {
@@ -20,7 +20,7 @@ const ListItemSchema = new mongoose.Schema({
         require: true,
     },
     quantity: {
-        type: Number,
+        type: String,
         required: false,
         default: 1,
     },

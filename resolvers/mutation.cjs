@@ -102,7 +102,8 @@ module.exports = {
         if (!user) {
             throw new AuthenticationError("You must be signed in to invite members");
         }
-        const family = await models.Family.findOne({ _id: args.family_id });
+        const currentUser = await models.User.findById(user.id);
+        const family = await models.Family.findOne({ id: currentUser.family });
         if (family && String(family.owner) !== user.id) {
             throw new AuthenticationError(
                 "You must be owner of family to invite members"
@@ -315,7 +316,8 @@ module.exports = {
                 "You must be signed in to delete shopping lists"
             );
         }
-        const family = await models.Family.findOne({ _id: args.family_id });
+        const foundUser = await models.User.findById(user.id);
+        const family = await models.Family.findById(foundUser.family);
         if (family.owner !== user) {
             throw new AuthenticationError(
                 "You must be owner of the family to toggle shopping lists"
