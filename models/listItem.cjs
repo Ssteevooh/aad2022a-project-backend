@@ -1,10 +1,18 @@
 const mongoose = require('mongoose');
 
 const ListItemSchema = new mongoose.Schema({
-    item: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Item',
-        require: true,
+    name: {
+        type: String,
+        required: true,
+        /*index: { unique: false }*/
+    },
+    description: {
+        type: String,
+        required: false,
+    },
+    price: {
+        type: Number,
+        required: false,
     },
     shopping_list: {
         type: mongoose.Schema.Types.ObjectId,

@@ -12,27 +12,6 @@ type Family {
   updatedAt: DateTime!
 }
 
-type Item {
-  id: ID!
-  name: String!
-  description: String
-  price: Float
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
-type ListItem {
-  id: ID!
-  item: Item!
-  shopping_list: ShoppingList!
-  quantity: Int
-  collected: Boolean
-  notes: String
-  total_price: Float
-  createdAt: DateTime!
-  updatedAt: DateTime!
-}
-
 type ShoppingList {
   id: ID!
   name: String!
@@ -51,9 +30,21 @@ type User {
   invitations: [Family]
 }
 
+type ListItem {
+  id: ID!
+  name: String!
+  price: Float
+  shopping_list: ShoppingList!
+  quantity: Int
+  collected: Boolean
+  notes: String
+  total_price: Float
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
 type Query {
   getFamily(family_id: ID!): Family
-  getItems: [Item!]!
   getShoppingListContent(shopping_list_id: ID!): [ListItem]
   getMyShoppingLists: [ShoppingList]!
   user(name: String!): [User]
@@ -73,14 +64,12 @@ type Mutation {
   inviteMember(family_id: ID, user_id: ID): Boolean
   deleteFamilyMember(user_id: ID!): Boolean
   updateFamily(family_id: ID, family_name: String!): Family
-  createItem(name: String!, description: String, price: Float!): Item
-  deleteItem(item_id: ID!): String
-  updateItem(item_id: ID, name: String!, description: String!, price: Float!): Item
   createShoppingList(name: String): ShoppingList
   toggleShoppingList(shopping_list_id: ID!): ShoppingList
   deleteShoppingList(shopping_list_id: ID, family_id: ID): Boolean
-  createListItem(shopping_list_id: ID!, item_id: ID!, quantity: Int): ListItem
-  updateListItem(shopping_list_id: ID!, list_item_id: ID!, quantity: Int, collected: Boolean, notes: String): ListItem
+
+  createListItem(shopping_list_id: ID!, name: String!, price: Float, quantity: Int): ListItem
+  updateListItem(shopping_list_id: ID!, name: String!, price: Float, quantity: Int, collected: Boolean, notes: String): ListItem
   deleteListItem(list_item_id: ID!, shopping_list_id: ID!): Boolean
 }
 `;

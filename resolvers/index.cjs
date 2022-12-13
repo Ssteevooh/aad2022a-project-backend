@@ -1,6 +1,5 @@
 const Query = require('./query.cjs');
 const Family = require('./family.cjs');
-const Item = require('./item.cjs');
 const ListItem = require('./listItem.cjs');
 const ShoppingList = require('./shoppingList.cjs');
 const User = require('./user.cjs');
@@ -11,7 +10,6 @@ module.exports = {
   Query,
   Mutation,
   Family,
-  Item,
   ListItem,
   ShoppingList,
   User,

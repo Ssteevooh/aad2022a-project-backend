@@ -213,33 +213,6 @@ module.exports = {
             }
         );
     },
-    createItem: async (parent, args, { models, user }) => {
-        return await models.Item.create({
-            name: args.name,
-            description: args.description,
-            price: args.price,
-        });
-    },
-    deleteItem: async (parent, args, { models, user }) => {
-        if (!user) {
-            throw new AuthenticationError("You must be signed in to delete items");
-        }
-        await models.Item.findOneAndDelete({ _id: args.family_id });
-        //TODO remove also from shopping lists
-        return "Item deleted";
-    },
-    updateItem: async (parent, args, { models }) => {
-        if (!user) {
-            throw new AuthenticationError("You must be signed in to update items");
-        }
-        const updateObject = {};
-        if (args.description) updateObject.description = args.description;
-        if (args.price) updateObject.price = args.price;
-        if (args.name) updateObject.name = args.name;
-        return await models.Item.findByIdAndUpdate(args.item_id, updateObject, {
-            new: true,
-        });
-    },
     createListItem: async (parent, args, { models, user }) => {
         if (!user) {
             throw new AuthenticationError(
@@ -254,8 +227,9 @@ module.exports = {
         }
         // TODO calculate total.
         return await models.ListItem.create({
-            item: mongoose.Types.ObjectId(args.item_id),
             shopping_list: mongoose.Types.ObjectId(args.shopping_list_id),
+            name: args.name,
+            price: args.price || 0,
             notes: args.notes || null,
             quantity: args.quantity || 1,
         });
@@ -285,6 +259,9 @@ module.exports = {
             : (updateObject.collected = false);
         if (args.quantity) updateObject.quantity = args.quantity;
         if (args.notes) updateObject.notes = args.notes;
+        if (args.name) updateObject.name = args.name;
+        if (args.price) updateObject.price = args.price;
+
         return await models.ListItem.findByIdAndUpdate(
             args.list_item_id,
             updateObject,

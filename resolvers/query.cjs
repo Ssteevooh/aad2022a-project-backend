@@ -3,10 +3,6 @@ const mongoose = require('mongoose');
 module.exports = {
   getFamily: async (parent, args, { models, user }) => {
     return await models.Family.findById(mongoose.Types.ObjectId(args.family_id));
-  }, 
-  getItems: async (parent, args, { models }) => {
-    //Mayby allow search ?
-    return await models.Item.find();
   },
   getShoppingListContent: async (parent, args, { models }) => {
     const listItems = await models.ListItem.find({shopping_list: args.shopping_list_id});
