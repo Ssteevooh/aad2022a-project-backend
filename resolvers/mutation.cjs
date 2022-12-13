@@ -310,7 +310,7 @@ module.exports = {
             }
         );
     },
-    deleteShoppingList: async (parent, args, { models }) => {
+    deleteShoppingList: async (parent, args, { models, user }) => {
         if (!user) {
             throw new AuthenticationError(
                 "You must be signed in to delete shopping lists"
