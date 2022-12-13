@@ -6,7 +6,7 @@ scalar DateTime
 type Family {
   id: ID!
   family_name: String
-  owner: User
+  owner: User!
   members: [User]
   createdAt: DateTime!
   updatedAt: DateTime!
