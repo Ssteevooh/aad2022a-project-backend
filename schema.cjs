@@ -4,7 +4,7 @@ module.exports = gql`
 scalar DateTime
 
 type Family {
-  id: ID!
+  id: ID
   family_name: String
   owner: User!
   members: [User]

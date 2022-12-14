@@ -57,19 +57,30 @@ module.exports = {
             throw new AuthenticationError("You must be signed in to leave family");
         }
         const foundUser = await models.User.findById(user.id);
-        await models.Family.findByIdAndUpdate(
-            foundUser.family,
-            {
-                $pull: {
-                    members: mongoose.Types.ObjectId(user.id),
+        const currentFamily = await models.Family.findById(foundUser.family);
+        let tempMembers = [];
+        for (let index = 0; index < currentFamily.members.length; index++) {
+            const member = currentFamily.members[index];
+            let stringVersion = String(member);
+            tempMembers.push(stringVersion);
+        }
+        if ((tempMembers.length === 1 && tempMembers.includes(user.id) || String(currentFamily.owner) === user.id)) {
+            await models.Family.findByIdAndDelete(foundUser.family);
+        } else {
+            await models.Family.findByIdAndUpdate(
+                foundUser.family,
+                {
+                    $pull: {
+                        members: mongoose.Types.ObjectId(user.id),
+                    },
                 },
-            },
-            {
-                new: true,
-            }
-        );
-        await models.User.findOneAndUpdate(
-            { _id: user.id },
+                {
+                    new: true,
+                }
+            );
+        }
+        await models.User.findByIdAndUpdate(
+            user.id,
             { family: null },
             { new: true }
         );
@@ -87,7 +98,7 @@ module.exports = {
         await models.User.findByIdAndUpdate(
             user.id,
             {
-                family: mongoose.Types.ObjectId(result._id)
+                family: mongoose.Types.ObjectId(String(result._id))
             },
             {
                 new: true,

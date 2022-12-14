@@ -2,6 +2,7 @@ require('dotenv').config();
 
 module.exports = {
   family: async (user, args, { models }) => {
+    console.log(user._id);
     return await models.Family.find({ members: user._id});
   },
   invitations: async (user, args, { models }) => {
